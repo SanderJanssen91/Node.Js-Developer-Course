@@ -2,7 +2,6 @@ console.log('Starting app.js');
 
 const fs = require('fs');
 const _ = require('lodash');
-<<<<<<< HEAD
 const yargs = require('yargs');
 
 const notes = require('./notes.js');

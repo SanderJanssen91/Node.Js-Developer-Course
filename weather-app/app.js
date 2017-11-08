@@ -1,5 +1,7 @@
-const request = require('request');
 const yargs = require('yargs');
+
+const geocode = require('./geocode/geocode');
+const weather = require('./weather/weather');
 
 const argv = yargs
   .options({
@@ -14,17 +16,17 @@ const argv = yargs
   .alias('help', 'h')
   .argv;
 
-  console.log(argv.address);
-  var encodedAddress = encodeURIComponent(argv.address);
-  var stdUrl = 'https://maps.googleapis.com/maps/api/geocode/json?address=';
-
-request({
-  url: stdUrl+encodedAddress,
-  json: true
-}, (error, response, body) => {
-    var lat = body.results[0].geometry.location.lat;
-    var lng = body.results[0].geometry.location.lng;
-    console.log(`Address: ${body.results[0].formatted_address}`);
-    console.log(`Lat: ${lat}`);
-    console.log(`Long: ${lng}`);
-});
+  geocode.geocodeAddress(argv.address, (errorMessage, results) => {
+    if (errorMessage){
+      console.log(errorMessage);
+    } else {
+      console.log(results.address);
+      weather.getWeather(results.lat, results.lng, (errorMessage, weatherResults) => {
+        if (errorMessage){
+          console.log(errorMessage);
+        } else {
+          console.log(`It's currently ${((weatherResults.temperature-32)/1.8).toFixed(1)}. It feels like ${((weatherResults.apparentTemperature-32)/1.8).toFixed(1)}.`);
+        }
+      });
+    }
+  });
